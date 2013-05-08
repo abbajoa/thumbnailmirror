@@ -5,6 +5,7 @@ ThumbnailMirror is a library & command line tool for creating mirror of your pic
 Install
 --------------------------------------------------
 Downlaod and unzip.
+http://abbajoa.com/thumbnailmirror-0.1.0zip
 
 Features
 --------------------------------------------------
