@@ -1,6 +1,6 @@
 ThumbnailMirror
 ==================================================
-ThumbnailMirror is a library & command line tool for creating mirror of your picture gallery.
+ThumbnailMirror is a Java library & command line tool for creating mirror of your picture gallery.
 
 Install
 --------------------------------------------------
