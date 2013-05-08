@@ -1,0 +1,15 @@
+#!/bin/sh
+EXE="$0"
+while [ -h "$EXE" ] ; do
+        ls=`ls -ld "$EXE"`
+        link=`expr "$ls" : '.*-> \(.*\)$'`
+        if expr "$link" : '/.*' > /dev/null; then
+                EXE="$link"
+        else
+                EXE=`dirname "$EXE"`"/$link"
+        fi
+done
+
+CC_HOME=`dirname "$EXE"`/..
+JAR_PATH=`find $CC_HOME/lib/*-jar-with-dependencies.jar | head -n 1`
+java -jar $JAR_PATH $1 $2 $3 $4 $5 $6 $7
