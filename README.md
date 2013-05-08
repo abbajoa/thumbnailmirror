@@ -12,9 +12,10 @@ Features
 - Can specify thumbnail size.
 - Can specify JPEG quality
 
-Usage
+Usage - Console Interface
 --------------------------------------------------
-'''bash
+```bash
+$ thumbnailmirror
 Usage:
         thumbnailmirror [source directory] [destination directory] [max size] [jpeg quality]
 Example:
