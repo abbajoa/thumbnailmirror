@@ -12,7 +12,6 @@ import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.FileImageOutputStream;
 
 import com.mortennobel.imagescaling.DimensionConstrain;
@@ -45,10 +44,8 @@ public class ImageUtil {
 		return resampleOp.filter(img, null);
 	}
 
-	public static ImageReader createJpegReader(File src) throws FileNotFoundException, IOException {
-		ImageReader reader = ImageIO.getImageReadersByFormatName("jpeg").next();
-		reader.setInput(new FileImageInputStream(src));
-		return reader;
+	public static ImageReader createJpegReader() {
+		return ImageIO.getImageReadersByFormatName("jpeg").next();
 	}
 
 	public static BufferedImage readImage(ImageReader reader) throws IOException {

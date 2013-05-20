@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.FileImageInputStream;
 
 public class Mirror {
 	
@@ -47,14 +48,20 @@ public class Mirror {
 	}
 
 	private static void createJpegThumbnail(File src, File dest, int maxBoxSize, int quality) throws FileNotFoundException, IOException {
-		ImageReader reader = ImageUtil.createJpegReader(src);
+		FileImageInputStream fis = new FileImageInputStream(src);
 		try {
-			IIOMetadata exif = ImageUtil.readJpegExifTags(reader);
-			BufferedImage original = ImageUtil.readImage(reader);
-			BufferedImage rescaled = ImageUtil.getRescaled(original, maxBoxSize);
-			ImageUtil.writeJpeg(rescaled, exif, quality / 100f, dest);
+			ImageReader reader = ImageUtil.createJpegReader();
+			try {
+				reader.setInput(fis);
+				IIOMetadata exif = ImageUtil.readJpegExifTags(reader);
+				BufferedImage original = ImageUtil.readImage(reader);
+				BufferedImage rescaled = ImageUtil.getRescaled(original, maxBoxSize);
+				ImageUtil.writeJpeg(rescaled, exif, quality / 100f, dest);
+			} finally {
+				reader.dispose();
+			}
 		} finally {
-			reader.dispose();
+			fis.close();
 		}
 	}
 
