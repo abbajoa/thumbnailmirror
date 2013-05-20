@@ -15,14 +15,21 @@ public class Console {
 		File destDir = new File(args[1]);
 		int maxBoxSize = Integer.parseInt(args[2]); // TODO validation
 		int quality = Integer.parseInt(args[3]); // TODO validation
+		
+		boolean waitingEchoed = false;
 		while(true) {
-			Mirror.mirror(sourceDir, destDir, maxBoxSize, quality, new EventListener<File>() {
+			boolean convertedAny = Mirror.mirror(sourceDir, destDir, maxBoxSize, quality, new EventListener<File>() {
 				@Override
 				public void onEvent(File data) {
 					System.out.println("Create thumbnail : " + FileUtil.getRelativePath(sourceDir, data));
 				}
 			});
-			System.out.println("Waiting for Changes...");
+			if(convertedAny)
+				waitingEchoed = false;
+			if(!waitingEchoed) {
+				System.out.println("Waiting for Changes...");
+				waitingEchoed = true;
+			}
 			Thread.sleep(10000);
 		}
 	}

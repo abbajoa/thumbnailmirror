@@ -16,11 +16,12 @@ import javax.imageio.stream.FileImageInputStream;
 
 public class Mirror {
 	
-	public static void mirror(final File sourceDir, final File destDir, final int maxBoxSize, final int quality, final EventListener<File> createEventListener) throws IOException, FileNotFoundException {
+	public static boolean mirror(final File sourceDir, final File destDir, final int maxBoxSize, final int quality, final EventListener<File> createEventListener) throws IOException, FileNotFoundException {
 		if(!sourceDir.isDirectory())
 			throw new IOException(sourceDir + " is not a directory");
 		final Set<File> destFiles = new HashSet<File>();
 		final Set<File> destDirectories = new HashSet<File>();
+		final Set<File> converted = new HashSet<File>();
 		FileUtil.visitAllFiles(sourceDir, new Visitor<File, IOException>() {
 			public void visit(File file) throws IOException {
 				if(!isConvertableImageFile(file))
@@ -35,11 +36,13 @@ public class Mirror {
 					createEventListener.onEvent(file);
 					createJpegThumbnail(file, tempFile, maxBoxSize, quality);
 					tempFile.renameTo(destFile);
+					converted.add(file);
 				}
 			}
 		});			
 		deleteUnnecessaryFiles(destDir, destFiles);
 		deleteUnnecessaryDirectories(destDir, destDirectories);
+		return !converted.isEmpty();
 	}
 
 
