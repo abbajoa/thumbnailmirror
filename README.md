@@ -21,3 +21,7 @@ Usage:
         thumbnailmirror [source directory] [destination directory] [max size] [jpeg quality]
 Example:
         tthumbnailmirror ~/pictures ~/mirror 1280 90
+```
+
+Usage - Java Library
+--------------------------------------------------
