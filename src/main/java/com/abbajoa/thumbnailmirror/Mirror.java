@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.FileImageInputStream;
@@ -59,7 +60,11 @@ public class Mirror {
 				IIOMetadata exif = ImageUtil.readJpegExifTags(reader);
 				BufferedImage original = ImageUtil.readImage(reader);
 				BufferedImage rescaled = ImageUtil.getRescaled(original, maxBoxSize);
-				ImageUtil.writeJpeg(rescaled, exif, quality / 100f, dest);
+				try {
+					ImageUtil.writeJpeg(rescaled, exif, quality / 100f, dest);
+				} catch (IIOException e) {
+					System.out.println("WARNING: " + "cannot create image (" + e.getMessage() + ")");
+				}
 			} finally {
 				reader.dispose();
 			}
