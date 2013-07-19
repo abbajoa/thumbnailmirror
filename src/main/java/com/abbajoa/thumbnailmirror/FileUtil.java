@@ -7,19 +7,25 @@ import java.io.IOException;
 public class FileUtil {
 
 	public static void visitAllFiles(File dir, Visitor<File, IOException> visitor) throws IOException, FileNotFoundException {
-		for(final File sub : dir.listFiles()) {
-			if(sub.isFile())
-				visitor.visit(sub);
-			else
-				visitAllFiles(sub, visitor);			
+		File[] list = dir.listFiles();
+		if(list != null) {
+			for(File sub : list) {
+				if(sub.isFile())
+					visitor.visit(sub);
+				else
+					visitAllFiles(sub, visitor);			
+			}
 		}
 	}
 
 	public static void visitAllSubDirectories(File dir, Visitor<File, IOException> visitor) throws IOException, FileNotFoundException {
-		for(final File sub : dir.listFiles()) {
-			if(sub.isDirectory()) {
-				visitor.visit(sub);
-				visitAllSubDirectories(sub, visitor);
+		File[] list = dir.listFiles();
+		if(list != null) {
+			for(File sub : list) {
+				if(sub.isDirectory()) {
+					visitor.visit(sub);
+					visitAllSubDirectories(sub, visitor);
+				}
 			}
 		}
 	}
