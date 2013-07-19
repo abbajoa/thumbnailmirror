@@ -14,13 +14,15 @@ import javax.imageio.IIOException;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.MemoryCacheImageInputStream;
 
 public class Mirror {
 	
 	public static boolean mirror(final File sourceDir, final File destDir, final int maxBoxSize, final int quality, final EventListener<File> createEventListener) throws IOException, FileNotFoundException {
 		if(!sourceDir.isDirectory())
 			throw new IOException(sourceDir + " is not a directory");
-		final Set<File> destFiles = new HashSet<File>();
+		final Set<File> absoluteDestFiles = new HashSet<File>();
 		final Set<File> destDirectories = new HashSet<File>();
 		final Set<File> converted = new HashSet<File>();
 		FileUtil.visitAllFiles(sourceDir, new Visitor<File, IOException>() {
@@ -28,7 +30,7 @@ public class Mirror {
 				if(!isConvertableImageFile(file))
 					return;
 				File destFile = new File(destDir.getAbsolutePath() + "/" + FileUtil.getRelativePath(sourceDir, file) + "." + file.lastModified() + "." + maxBoxSize + "." + quality + ".jpg");
-				destFiles.add(destFile);
+				absoluteDestFiles.add(destFile);
 				if(!destFile.exists()) {
 					File dir = destFile.getParentFile();
 					destDirectories.add(dir);
@@ -40,8 +42,8 @@ public class Mirror {
 					converted.add(file);
 				}
 			}
-		});			
-		deleteUnnecessaryFiles(destDir, destFiles);
+		});
+		deleteUnnecessaryFiles(destDir, absoluteDestFiles);
 		deleteUnnecessaryDirectories(destDir, destDirectories);
 		return !converted.isEmpty();
 	}
@@ -57,11 +59,18 @@ public class Mirror {
 			ImageReader reader = ImageUtil.createJpegReader();
 			try {
 				reader.setInput(fis);
-				IIOMetadata exif = ImageUtil.readJpegExifTags(reader);
-				BufferedImage original = ImageUtil.readImage(reader);
+				IIOMetadata exifOfNull = null;
+				BufferedImage original;
+				try {
+					exifOfNull = ImageUtil.readJpegExifTags(reader);
+					original = ImageUtil.readImage(reader);
+				} catch(IIOException e) {
+					exifOfNull = null;
+					original = loadEmptyImage();
+				}
 				BufferedImage rescaled = ImageUtil.getRescaled(original, maxBoxSize);
 				try {
-					ImageUtil.writeJpeg(rescaled, exif, quality / 100f, dest);
+					ImageUtil.writeJpeg(rescaled, exifOfNull, quality / 100f, dest);
 				} catch (IIOException e) {
 					System.out.println("WARNING: " + "cannot create image (" + e.getMessage() + ")");
 				}
@@ -73,11 +82,28 @@ public class Mirror {
 		}
 	}
 
-	private static void deleteUnnecessaryFiles(final File destDir, final Set<File> necessaryFiles) throws IOException, FileNotFoundException {
+
+	private static BufferedImage loadEmptyImage() throws IOException {
+		ImageInputStream fis = new MemoryCacheImageInputStream(Mirror.class.getResourceAsStream("/empty.jpg"));
+		try {
+			ImageReader reader = ImageUtil.createJpegReader();
+			try {
+				reader.setInput(fis);
+				return ImageUtil.readImage(reader);
+			} finally {
+				reader.dispose();
+			}
+		} finally {
+			fis.close();
+		}
+	}
+
+	private static void deleteUnnecessaryFiles(final File destDir, final Set<File> necessaryAbsoluteFiles) throws IOException, FileNotFoundException {
 		FileUtil.visitAllFiles(destDir, new Visitor<File, IOException>() {
-			public void visit(File data) throws IOException {
-				if(!necessaryFiles.contains(data))
-					data.delete();
+			public void visit(File file) throws IOException {
+				if(!necessaryAbsoluteFiles.contains(file.getAbsoluteFile())) {
+					file.delete();
+				}
 			}
 		});
 	}
