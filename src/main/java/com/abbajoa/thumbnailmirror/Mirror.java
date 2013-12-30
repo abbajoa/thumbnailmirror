@@ -63,16 +63,21 @@ public class Mirror {
 				BufferedImage original;
 				try {
 					exifOfNull = ImageUtil.readJpegExifTags(reader);
-					original = ImageUtil.readImage(reader);
-				} catch(IIOException e) {
+				} catch (IIOException e) {
 					exifOfNull = null;
+					System.out.println("WARNING: " + "cannot read exif from " + src + " (" + e.getMessage() + ")"); // TODO introduce listener
+				}
+				try {
+					original = ImageUtil.readImage(reader);
+				} catch (IIOException e) {
 					original = loadEmptyImage();
+					System.out.println("WARNING: " + "cannot read image (" + e.getMessage() + ")"); // TODO introduce listener
 				}
 				BufferedImage rescaled = ImageUtil.getRescaled(original, maxBoxSize);
 				try {
 					ImageUtil.writeJpeg(rescaled, exifOfNull, quality / 100f, dest);
 				} catch (IIOException e) {
-					System.out.println("WARNING: " + "cannot create image (" + e.getMessage() + ")");
+					System.out.println("WARNING: " + "cannot create image (" + e.getMessage() + ")"); // TODO introduce listener
 				}
 			} finally {
 				reader.dispose();
